@@ -1,278 +1,113 @@
 #include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <string>
 #include <cstring>
 #include <map>
-#include <vector>
-#include <algorithm>
-#include <cctype>
-#include <stack>
 using namespace std;
-map<string, int[2]> elements;
-struct Ele{
-    string name;
-    int num;
-    Ele(string n, int nu):name(n),num(nu){}
-};
+const int N = 1001;
+char equa[N];
 
-bool is_equal(string s)
-{
-    int eq = int(s.find("="));
-    string leftf = s.substr(0, eq);
-    int lsize = int(leftf.length());
-    string rightf = s.substr(eq+1, s.length()-eq-1);
-    int rsize = int(rightf.length());
-    int tot;//表达式系数
-    for(int i=0;i<lsize;)
-    {
-        tot = 0;
-        while(isdigit(leftf[i])) //求系数
-        {
-            tot*=10;
-            tot += leftf[i]-'0';
-            i++;
+int match(int k){ // 传入左括号  返回与其匹配的右括号的下标
+    int c = 0;
+    for(;;++k){
+        if(equa[k] == '('){
+            ++c;
+        }else if(equa[k] == ')'){
+            --c;
         }
-        if(tot==0)
-            tot=1;
-        if(leftf[i]=='+') //遇到+
-        {i++;continue;}
-        //处理化学式
-        while(i<lsize && leftf[i]!='+'){
-            int subt = 0;
-            string e;
-            if(leftf[i] !='(' && leftf[i] !=')') //表达式无括号
-            {
-                if(i+1<lsize && islower(leftf[i+1]))//Aa
-                {
-                    e = leftf.substr(i, 2);
-                    i = i+2;
-                    while(isdigit(leftf[i])) //求系数
-                    {
-                        subt*=10;
-                        subt += leftf[i]-'0';
-                        i++;
-                    }
-                    if(subt==0)
-                        subt = 1;
-                    subt = subt*tot;
-                    elements[e][0] += subt;
-                }
-                else  //A
-                {
-                    e = leftf.substr(i, 1);
-                    i = i+1;
-                    while(isdigit(leftf[i])) //求系数
-                    {
-                        subt*=10;
-                        subt += leftf[i]-'0';
-                        i++;
-                    }
-                    if(subt==0)
-                        subt = 1;
-                    subt = subt*tot;
-                    elements[e][0] += subt;
-                }
-            }//表达式无括号
-            else//表达式有括号
-            {
-                stack<Ele> eles;
-                eles.push(Ele("(", -1));
-                while(!eles.empty())
-                {
-                    int subt = 0;
-                    string e;
-                    if(leftf[i] !=')')
-                    {
-                        if(i+1<lsize && islower(leftf[i+1]))//Aa
-                        {
-                            e = leftf.substr(i, 2);
-                            i = i+2;
-                            while(isdigit(leftf[i])) //求系数
-                            {
-                                subt*=10;
-                                subt += leftf[i]-'0';
-                                i++;
-                            }
-                            if(subt==0)
-                                subt = 1;
-                            subt = subt*tot;
-                            eles.push(Ele(e, subt));
-                        }
-                        else  //A
-                        {
-                            e = leftf.substr(i, 1);
-                            i = i+1;
-                            while(isdigit(leftf[i])) //求系数
-                            {
-                                subt*=10;
-                                subt += leftf[i]-'0';
-                                i++;
-                            }
-                            if(subt==0)
-                                subt = 1;
-                            subt = subt*tot;
-                            eles.push(Ele(e, subt));
-                        }
-                    }//if(leftf[i] !=')')
-                    else
-                    {
-                        i++;//右括号
-                        subt = 0;
-                        while(isdigit(leftf[i])) //求系数
-                        {
-                            subt*=10;
-                            subt += leftf[i]-'0';
-                            i++;
-                        }
-                        if(subt==0)
-                            subt = 1;
-                        while(!eles.empty())
-                        {
-                            Ele tmp = eles.top();
-                            eles.pop();
-                            if(tmp.name!="("){tmp.num *= subt;elements[tmp.name][0] += tmp.num;}
-                        }
-                    }
-                }//while(!eles.empty())
-            }
+        if(c == 0){
+            return k;
         }
     }
-    //右式
-    for(int i=0;i<rsize;)
-    {
-        tot = 0;
-        while(isdigit(rightf[i])) //求系数
-        {
-            tot*=10;
-            tot += rightf[i]-'0';
-            i++;
-        }
-        if(tot==0)
-            tot=1;
-        if(rightf[i]=='+') //遇到+
-        {i++;continue;}
-        //处理化学式
-        while(i<rsize && rightf[i]!='+'){
-            int subt = 0;
-            string e;
-            if(rightf[i] !='(' && rightf[i] !=')') //表达式无括号
-            {
-                if(i+1<rsize && islower(rightf[i+1]))//Aa
-                {
-                    e = rightf.substr(i, 2);
-                    i = i+2;
-                    while(isdigit(rightf[i])) //求系数
-                    {
-                        subt*=10;
-                        subt += rightf[i]-'0';
-                        i++;
-                    }
-                    if(subt==0)
-                        subt = 1;
-                    subt = subt*tot;
-                    elements[e][1] += subt;
-                }
-                else  //A
-                {
-                    e = rightf.substr(i, 1);
-                    i = i+1;
-                    while(isdigit(rightf[i])) //求系数
-                    {
-                        subt*=10;
-                        subt += rightf[i]-'0';
-                        i++;
-                    }
-                    if(subt==0)
-                        subt = 1;
-                    subt = subt*tot;
-                    elements[e][1] += subt;
-                }
-            }//表达式无括号
-            else//表达式有括号
-            {
-                stack<Ele> eles;
-                eles.push(Ele("(", -1));
-                while(!eles.empty())
-                {
-                    int subt = 0;
-                    string e;
-                    if(rightf[i] !=')')
-                    {
-                        if(i+1<rsize && islower(rightf[i+1]))//Aa
-                        {
-                            e = rightf.substr(i, 2);
-                            i = i+2;
-                            while(isdigit(rightf[i])) //求系数
-                            {
-                                subt*=10;
-                                subt += rightf[i]-'0';
-                                i++;
-                            }
-                            if(subt==0)
-                                subt = 1;
-                            subt = subt*tot;
-                            eles.push(Ele(e, subt));
-                        }
-                        else  //A
-                        {
-                            e = rightf.substr(i, 1);
-                            i = i+1;
-                            while(isdigit(rightf[i])) //求系数
-                            {
-                                subt*=10;
-                                subt += rightf[i]-'0';
-                                i++;
-                            }
-                            if(subt==0)
-                                subt = 1;
-                            subt = subt*tot;
-                            eles.push(Ele(e, subt));
-                        }
-                    }//if(leftf[i] !=')')
-                    else
-                    {
-                        i++;//右括号
-                        subt = 0;
-                        while(isdigit(rightf[i])) //求系数
-                        {
-                            subt*=10;
-                            subt += rightf[i]-'0';
-                            i++;
-                        }
-                        if(subt==0)
-                            subt = 1;
-                        while(!eles.empty())
-                        {
-                            Ele tmp = eles.top();
-                            eles.pop();
-                            if(tmp.name!="("){tmp.num *= subt;elements[tmp.name][1] += tmp.num;}
-                        }
-                    }
-                }//while(!eles.empty())
-            }
-        }
-    }
-    map<string, int[2]>::iterator iter;
-    for (iter=elements.begin(); iter!=elements.end(); iter++)
-    {
-//        cout << iter->first;
-//        printf(" 左：%d 右：%d\n",iter->second[0],iter->second[1]);
-        if(iter->second[0]!=iter->second[1])
-            return false;
-    }
-    return true;
 }
 
-int main() {
+void element(map<string, int> &mp, int coef, int l, int r){
+    mp[string(equa + l, equa + r + 1)] += coef;
+    // string的特殊构造方法：string(start, end), 与其他STL同样是左闭右开
+}
+
+void term(map<string, int> &mp, int coef, int l, int r){
+    void formula(map<string, int> &mp, int coef, int l, int r);
+    if(equa[l] == '(' && equa[r] == ')') {
+        formula(mp, coef, l + 1, r - 1);
+        return;
+    }
+    element(mp, coef, l, r);
+}
+
+void term_coef(map<string, int> &mp, int coef, int l, int r){
+    if(equa[r] >= '0' && equa[r] <= '9'){
+        int pos = r, num = 0;
+        while(equa[pos] >= '0' && equa[pos] <= '9'){
+            --pos;
+        }
+        for(int k = pos + 1; k <= r; k++){
+            num = num * 10 + (equa[k] - '0');
+        }
+        if(num) coef *= num;
+        term(mp, coef, l, pos);
+        return;
+    }
+    term(mp, coef, l, r);
+}
+
+void formula(map<string, int> &mp, int coef, int l, int r){
+    for(int i = l; i <= r; ){
+        if(equa[i] == '('){
+            int p = match(i) + 1;
+            if(p > r){ // 括号是formula的最后一个字符  可以return
+                // 如 Na(Au(CN)2)
+                term_coef(mp, coef, i, p - 1);
+                return;
+            }
+            while(equa[p] >= '0' && equa[p] <= '9'){
+                ++p;
+            }  // 括号后可能有下标，如(CN)2
+            term_coef(mp, coef, i, p - 1);
+            i = p;  // i的更新方式
+        }else{
+            int p = i + 1;
+            while((equa[p] >= '0' && equa[p] <= '9') || (equa[p] >= 'a' && equa[p] <= 'z')){ // 跳过数字、小写字母
+                ++p;
+            }
+            term_coef(mp, coef, i, p - 1);
+            i = p;
+        }
+    }
+}
+void coef_formula(map<string, int> &mp, int l, int r){
+    if(equa[l] >= '0' && equa[l] <= '9'){
+        int coef = 0, pos = l;
+        while(equa[pos] >= '0' && equa[pos] <= '9'){
+            coef = coef * 10 + (equa[pos++] - '0');
+        }
+        formula(mp, coef, pos, r);
+        return;
+    }
+    formula(mp, 1, l, r);
+}
+
+map<string, int> expr(int l, int r){
+    map<string, int> mp;
+    int pre = l;
+    for(int i = l; i <= r; i++){
+        if(equa[i] == '+'){
+            coef_formula(mp, pre, i - 1);
+            pre = i + 1;
+        }
+    }
+    coef_formula(mp, pre, r);
+    return mp;
+}
+
+int main(int argc, char** argv) {
     int n;
-    cin >> n;
-    string s;
-    while(n--)
-    {
-        elements.clear();
-        cin >> s;
-        if(is_equal(s))
-            printf("Y\n");
-        else
-            printf("N\n");
+    scanf("%d", &n);
+    for(int i = 0; i < n; i++){
+        scanf("%s", equa);
+        int e = find(equa, equa + N, '=') - equa;
+        printf(expr(0, e - 1) == expr(e + 1, strlen(equa) - 1) ? "Y\n" : "N\n");
     }
     return 0;
 }
